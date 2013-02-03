@@ -79,10 +79,8 @@ class Function extends Functor
     p = @[2]
     p == nil or p ...
   orElse: (other) =>
-    @@ (...) ->
-      if @isDefinedAt ...
-        return @[1] ...
-      return other ... if other
+    @@Case ((...) -> @isDefinedAt(...) or other\isDefinedAt(...)), (...) ->
+      if @isDefinedAt ... then @[1](...) else other(...)
 
 Case = Function\Case
 Switch = (...) ->
