@@ -221,6 +221,10 @@ class List extends Functor
       @Nil!
     else
       @ConsDelay (-> value), (Delay -> @unfoldr f key)
+  @repeatDelay: (x) =>
+    local p
+    p = @ConsDelay x, -> p
+    return p
   @iterate0: (f, a) => @Cons a, @iterate f, a
   @iterate: (f, a) => @iterateDelay (delayfunc f), (-> a)
   @iterateDelay: (f, a) =>
@@ -407,7 +411,7 @@ class Sequence extends List
   __pow: (o) => @pow o
   __unm: => @unm!
   __concat: (o) => @append o
-  @pureDelay: (x) => @iterateDelay x
+  @pureDelay: (x) => @repeatDelay x
   applyDelay: (other) => @zipApplyDelay other
 
 return {
