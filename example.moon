@@ -57,3 +57,34 @@ print nat\map Switch {
   Case (_ %  5)\eq(0), -> 'Buzz'
   _
 }
+
+-- from www.haskell.org/haskellwiki/Prime_numbers
+minus = (X, Y) ->
+  return X if Y\empty!
+  x, xs = X\head!, X\tail!
+  y, ys = Y\head!, Y\tail!
+  if x < y
+    Sequence\ConsDelay (-> x), Delay -> minus xs, Y
+  elseif x <= y
+    minus xs, ys
+  else
+    minus X, ys
+union = (X, Y) ->
+  return X if Y\empty!
+  return Y if X\empty!
+  x, xs = X\head!, X\tail!
+  y, ys = Y\head!, Y\tail!
+  if x < y
+    Sequence\ConsDelay (-> x), Delay -> union xs, Y
+  elseif x <= y
+    Sequence\ConsDelay (-> x), Delay -> union xs, ys
+  else
+    Sequence\ConsDelay (-> y), Delay -> union X, ys
+prime = do
+  eulers = (x) ->
+    p, xs = x\head!, x\tail!
+    Sequence\ConsDelay (-> p), Delay -> eulers minus xs, x\map(=> p * @)
+  Sequence\ConsDelay (-> 2), Delay -> eulers Sequence\iterate((=> @ + 2), 1)
+
+print '# Primes'
+print prime
