@@ -87,9 +87,9 @@ class Function extends Functor
     @@Case ((...) -> @isDefinedAt(...) or other\isDefinedAt(...)), (...) ->
       if @isDefinedAt ... then @[1](...) else other(...)
 
+orElse = (x, y) -> x\orElse y
 Case = Function\Case
-Switch = (...) ->
-  foldr ((x, y) -> x\orElse y), ...
+Switch = (t) -> foldr orElse, unpack t
 
 class Delay extends Function
   __call: => @extract!
@@ -134,6 +134,7 @@ class Array extends Functor
         k += 1
         x[k] = v
   @Table: (t) => @For ipairs t
+  @List: (t) => @For t\pairs!
   empty: => #@ == 0
   head: => @[1]
   tail: => @@ unpack [x for x in *@], 2
@@ -199,6 +200,7 @@ class List extends Functor
     else
       @ConsDelay (-> value), (Delay -> @For f, s, key)
   @Table: (t) => @For ipairs t
+  @List: (t) => @For t\pairs!
   @unfoldr: (f, var) =>
     value, key = f var
     if key == nil
@@ -406,6 +408,7 @@ return {
   :compose
   :delayfunc
   :Function
+  :orElse
   :Switch
   :Case
   :Delay

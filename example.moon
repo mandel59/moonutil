@@ -41,13 +41,17 @@ namelist = List\Table {
   {id: 4, name: 'Dorothy', age: 21}
 }
 
-print namelist\filter(=> @age < 20)\orderBy(=> @age)\select(=> @name)
+print '# Query'
+namelist\each print
+print [[namelist\filter(=> @age < 20)\orderBy(=> @age)\select(=> @name)]]
+print '   ==>',
+  namelist\filter(=> @age < 20)\orderBy(=> @age)\select(=> @name)
 
 print '# Function combination'
 print "(_ + 5 .. _ * 2)(1) ==> #{(_ + 5 .. _ * 2)(1)}"
 
 print '# Partial function'
-print nat\map Switch unpack {
+print nat\map Switch {
   Case (_ % 15)\eq(0), -> 'FizzBuzz'
   Case (_ %  3)\eq(0), -> 'Fizz'
   Case (_ %  5)\eq(0), -> 'Buzz'
