@@ -18,6 +18,7 @@ foldr0 = (f, x, y, ...) ->
   if y == nil
     return
   return f y, foldr0 f, x, ...
+compose = (g, f) -> (...) -> g f (...)
 delayfunc = (f) -> (...) -> f map bang, ...
 
 class Tuple
@@ -65,26 +66,30 @@ class Function extends Functor
   __pow: (o) => @pow o
   __unm: => @unm!
   __concat: (f) =>
-    @@ (...) -> @[1] f(...)
+    f, fp = f\extract!
+    g, gp = @extract!
+    @@ compose(g, f), if fp and gp
+      (...) -> gp(...) and fp g(...)
+    else
+      fp or gp
   @Case: (p, f) => @@ ((...) -> f ... if p ...), p
   @pure: (x) => @ (-> x)
   @pureDelay: (x) => @ x
-  extract: => @[1]
+  extract: => unpack @
   duplicate: => @@ @
   map: (f) =>
-    @@ (...) -> f @[1](...)
+    @@(f)\__concat @
   apply: (other) =>
     @@ (...) -> @[1](...) other(...)
   isDefinedAt: (...) =>
-    p = @[2]
-    p == nil or p ...
+    if p = @[2], p ~= nil then p(...) else @[1](...) ~= nil
   orElse: (other) =>
     @@Case ((...) -> @isDefinedAt(...) or other\isDefinedAt(...)), (...) ->
       if @isDefinedAt ... then @[1](...) else other(...)
 
 Case = Function\Case
 Switch = (...) ->
-  foldr0 ((x, y) -> x\orElse y), Case(-> false), ...
+  foldr ((x, y) -> x\orElse y), ...
 
 class Delay extends Function
   __call: => @extract!
@@ -398,6 +403,7 @@ return {
   :foldl
   :foldr
   :foldr0
+  :compose
   :delayfunc
   :Function
   :Switch
