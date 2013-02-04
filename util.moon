@@ -1,6 +1,9 @@
 id = (...) -> ...
 bang = (x) -> x!
 insert = table.insert
+first = (x, ...) -> x
+second = (x, y, ...) -> y
+rest = (x, ...) -> ...
 map = (f, ...) ->
   t = {}
   for x in *{...}
@@ -18,7 +21,7 @@ foldr0 = (f, x, y, ...) ->
   if y == nil
     return
   return f y, foldr0 f, x, ...
-compose = (g, f) -> (...) -> g f (...)
+compose = (g, f) -> (...) -> g f ...
 delayfunc = (f) -> (...) -> f map bang, ...
 
 class Tuple
@@ -72,6 +75,12 @@ class Function extends Functor
       (...) -> gp(...) and fp g(...)
     else
       fp or gp
+  eqA: (o) => @map((x) -> (y) -> x == y)\apply(o)
+  ltA: (o) => @map((x) -> (y) -> x < y)\apply(o)
+  leA: (o) => @map((x) -> (y) -> x <= y)\apply(o)
+  fst: => @map(first)
+  snd: => @map(second)
+  rst: => @map(rest)
   @Case: (p, f) => @@ ((...) -> f ... if p ...), p
   @pure: (x) => @ (-> x)
   @pureDelay: (x) => @ x
@@ -80,7 +89,12 @@ class Function extends Functor
   map: (f) =>
     @@(f)\__concat @
   apply: (other) =>
-    @@ (...) -> @[1](...) other(...)
+    f, fp = other\extract!
+    g, gp = @extract!
+    @@ ((...) -> g(...) f(...)), if fp and gp
+      (...) -> gp(...) and fp(...)
+    else
+      fp or gp
   isDefinedAt: (...) =>
     if p = @[2], p ~= nil then p(...) else @[1](...) ~= nil
   orElse: (other) =>
@@ -401,6 +415,9 @@ return {
   it: Function id
   :bang
   :insert
+  :first
+  :second
+  :rest
   :map
   :foldl
   :foldr
