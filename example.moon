@@ -49,6 +49,7 @@ print '   ==>',
 
 print '# Function combination'
 print "(_ + 5 .. _ * 2)(1) ==> #{(_ + 5 .. _ * 2)(1)}"
+print "(_ * 2 + 5)(nat)\n   ==> #{(_ * 2 + 5)(nat)}"
 
 print '# Partial function'
 print nat\map Switch {
