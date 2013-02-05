@@ -337,6 +337,15 @@ class List extends Functor
         @@ConsDelay (-> head), (Delay -> @tail!\filter p)
       else
         @tail!\filter p
+  collect: (f) =>
+    if @empty!
+      @@Nil!
+    else
+      head = @head!
+      if x = f head, x ~= nil
+        @@ConsDelay (-> x), (Delay -> @tail!\collect f)
+      else
+        @tail!\collect f
   takeWhile: (p) =>
     if @empty!
       @@Nil!
