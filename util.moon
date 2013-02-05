@@ -81,25 +81,25 @@ class Function extends Functor
   fst: => @map(first)
   snd: => @map(second)
   rst: => @map(rest)
-  @Case: (p, f) => @@ ((...) -> f ... if p ...), p
-  @pure: (x) => @ (-> x)
-  @pureDelay: (x) => @ x
+  @Function: (...) => @ ...
+  @Case: (p, f) => @@Function ((...) -> f ... if p ...), p
+  @pure: (x) => @Function (-> x)
+  @pureDelay: (x) => @Function x
   extract: => unpack @
-  duplicate: => @@ @
   map: (f) =>
-    @@(f)\__concat @
+    @@Function(f)\__concat @
   apply: (other) =>
     f, fp = other\extract!
     g, gp = @extract!
-    @@ ((...) -> g(...) f(...)), if fp and gp
+    @@Function ((...) -> g(...) f(...)), if fp and gp
       (...) -> gp(...) and fp(...)
     else
       fp or gp
   isDefinedAt: (...) =>
-    if p = @[2], p ~= nil then p(...) else @[1](...) ~= nil
+    if p = @[2], p ~= nil then p(...) else @__call(...) ~= nil
   orElse: (other) =>
     @@Case ((...) -> @isDefinedAt(...) or other\isDefinedAt(...)), (...) ->
-      if @isDefinedAt ... then @[1](...) else other(...)
+      if @isDefinedAt ... then @__call(...) else other(...)
 
 orElse = (x, y) -> x\orElse y
 Case = Function\Case
