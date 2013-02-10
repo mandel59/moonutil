@@ -105,7 +105,7 @@ orElse = (x, y) -> x\orElse y
 Case = Function\Case
 Switch = (t) -> foldr orElse, unpack t
 
-class Delay extends Function
+class Lazy extends Function
   __call: => @extract!
   __add: (o) => @add o
   __sub: (o) => @sub o
@@ -212,7 +212,7 @@ class List extends Functor
     if key == nil
       @Nil!
     else
-      @ConsDelay (-> value), (Delay -> @For f, s, key)
+      @ConsDelay (-> value), (Lazy -> @For f, s, key)
   @Table: (t) => @For ipairs t
   @List: (t) => @For t\pairs!
   @unfoldr: (f, var) =>
@@ -220,7 +220,7 @@ class List extends Functor
     if key == nil
       @Nil!
     else
-      @ConsDelay (-> value), (Delay -> @unfoldr f key)
+      @ConsDelay (-> value), (Lazy -> @unfoldr f key)
   @repeatDelay: (x) =>
     local p
     p = @ConsDelay x, -> p
@@ -230,7 +230,7 @@ class List extends Functor
   @iterateDelay: (f, a) =>
     a = f a
     da = (-> a)
-    @ConsDelay da, (Delay -> @iterateDelay f, da)
+    @ConsDelay da, (Lazy -> @iterateDelay f, da)
   empty: => @[1] == nil
   head: => if x = @[1], x ~= nil then x!
   tail: => if x = @[2], x ~= nil then x!
@@ -254,7 +254,7 @@ class List extends Functor
     elseif n < 1
       @@Cons '...', @@Nil!
     else
-      @@ConsDelay (Delay -> tostring(@head!)), (Delay -> @tail!\ellipsize(n - 1))
+      @@ConsDelay (Lazy -> tostring(@head!)), (Lazy -> @tail!\ellipsize(n - 1))
   tostring: =>
     if @empty!
       '[]'
@@ -283,13 +283,13 @@ class List extends Functor
     if @empty!
       @@Nil!
     else
-      @@ConsDelay (Delay -> f (-> @head!)), (Delay -> @tail!\mapDelay f)
+      @@ConsDelay (Lazy -> f (-> @head!)), (Lazy -> @tail!\mapDelay f)
   append: (other) => @appendDelay (-> other)
   appendDelay: (other) =>
     if @empty!
       other!
     else
-      @@ConsDelay (Delay -> @head!), (Delay -> @tail!\appendDelay other)
+      @@ConsDelay (Lazy -> @head!), (Lazy -> @tail!\appendDelay other)
   foldl: (x, f) =>
     z = @
     while not z\empty!
@@ -300,7 +300,7 @@ class List extends Functor
     if @empty!
       x!
     else
-      @tail!\foldlDelay (Delay -> f (-> x), (Delay -> @head!)), f
+      @tail!\foldlDelay (Lazy -> f (-> x), (Lazy -> @head!)), f
   foldr: (x, f) =>
     if @empty!
       x
@@ -310,7 +310,7 @@ class List extends Functor
     if @empty!
       x!
     else
-      f (Delay -> @head!), (Delay -> @tail!\foldrDelay x, f)
+      f (Lazy -> @head!), (Lazy -> @tail!\foldrDelay x, f)
   foldl1: (f) =>
     @tail!\foldl @head!, f
   foldr1: (f) =>
@@ -320,21 +320,21 @@ class List extends Functor
     else
       f @head!, @tail!\foldr1 f
   concat: => @concatDelay!
-  concatDelay: => @foldrDelay (Delay -> @@Nil!), (x, y) -> x!\appendDelay y
+  concatDelay: => @foldrDelay (Lazy -> @@Nil!), (x, y) -> x!\appendDelay y
   concatMap: (f) => @map(f)\concat!
   concatMapDelay: (f) => @mapDelay(f)\concatDelay!
   take: (n) =>
     if n < 1 or @empty!
       @@Nil!
     else
-      @@ConsDelay (Delay -> @head!), (Delay -> @tail!\take(n - 1))
+      @@ConsDelay (Lazy -> @head!), (Lazy -> @tail!\take(n - 1))
   filter: (p) =>
     if @empty!
       @@Nil!
     else
       head = @head!
       if p head
-        @@ConsDelay (-> head), (Delay -> @tail!\filter p)
+        @@ConsDelay (-> head), (Lazy -> @tail!\filter p)
       else
         @tail!\filter p
   collect: (f) =>
@@ -343,7 +343,7 @@ class List extends Functor
     else
       head = @head!
       if x = f head, x ~= nil
-        @@ConsDelay (-> x), (Delay -> @tail!\collect f)
+        @@ConsDelay (-> x), (Lazy -> @tail!\collect f)
       else
         @tail!\collect f
   takeWhile: (p) =>
@@ -352,7 +352,7 @@ class List extends Functor
     else
       head = @head!
       if p head
-        @@ConsDelay (-> head), (Delay -> @tail!\takeWhile p)
+        @@ConsDelay (-> head), (Lazy -> @tail!\takeWhile p)
       else
         @@Nil!
   splitAt: (n) =>
@@ -363,14 +363,14 @@ class List extends Functor
     else
       x, y = @tail!\splitAt n - 1
       (@@Cons @head!, x), y
-  zipWith: (f, other) => @zipWithDelay(delayfunc(f), Delay -> other)
-  longZipWith: (f, other) => @longZipWithDelay(delayfunc(f), Delay -> other)
+  zipWith: (f, other) => @zipWithDelay(delayfunc(f), Lazy -> other)
+  longZipWith: (f, other) => @longZipWithDelay(delayfunc(f), Lazy -> other)
   zipWithDelay: (f, other) =>
     o = other!
     if @empty! or o\empty!
       @@Nil!
     else
-      @@ConsDelay (Delay -> f (Delay -> @head!), (Delay -> o\head!)), (Delay -> @tail!\zipWithDelay(f, Delay -> o\tail!))
+      @@ConsDelay (Lazy -> f (Lazy -> @head!), (Lazy -> o\head!)), (Lazy -> @tail!\zipWithDelay(f, Lazy -> o\tail!))
   longZipWithDelay: (f, other) =>
     o = other!
     if @empty!
@@ -378,23 +378,23 @@ class List extends Functor
     elseif o\empty!
       @
     else
-      @@ConsDelay (Delay -> f (Delay -> @head!), (Delay -> o\head!)), (Delay -> @tail!\longZipWithDelay(f, Delay -> o\tail!))
+      @@ConsDelay (Lazy -> f (Lazy -> @head!), (Lazy -> o\head!)), (Lazy -> @tail!\longZipWithDelay(f, Lazy -> o\tail!))
   zipApply: (other) => @map(delayfunc)\zipApplyDelay(-> other)
   zipApplyDelay: (other) =>
     o = other!
     if @empty! or o\empty!
       @@Nil!
     else
-      @@ConsDelay (Delay -> @head! Delay(-> o\head!)), (Delay -> @tail!\zipApplyDelay(Delay -> o\tail!))
+      @@ConsDelay (Lazy -> @head! (Lazy -> o\head!)), (Lazy -> @tail!\zipApplyDelay(Lazy -> o\tail!))
   @pure: (x) => @pureDelay (-> x)
-  @pureDelay: (x) => @ConsDelay x, (Delay -> @Nil!)
+  @pureDelay: (x) => @ConsDelay x, (Lazy -> @Nil!)
   apply: (other) => (@map delayfunc)\applyDelay(-> other)
   applyDelay: (other) => @concatMapDelay (f) -> other!\mapDelay f!
   bind: (f) => @@pure(f)\apply(@)\concat!
   bindDelay: (f) => @@pureDelay(-> f)\applyDelay(-> @)\concatDelay!
   extract: => @head!
-  extend: (f) => @@ConsDelay (Delay -> f @), (Delay -> (@tail! or @@Nil!)\extend f)
-  duplicate: => @@ConsDelay (-> @), (Delay -> (@tail! or @@Nil!)\duplicate!)
+  extend: (f) => @@ConsDelay (Lazy -> f @), (Lazy -> (@tail! or @@Nil!)\extend f)
+  duplicate: => @@ConsDelay (-> @), (Lazy -> (@tail! or @@Nil!)\duplicate!)
   cycle: =>
     f = (i) ->
       x = i!\tail!
@@ -441,7 +441,7 @@ return {
   :orElse
   :Switch
   :Case
-  :Delay
+  :Lazy
   :Tuple
   :List
   :Array

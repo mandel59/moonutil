@@ -1,5 +1,5 @@
 util = require 'util'
-import Function, Switch, Case, Delay, List, Array, Sequence from util
+import Function, Switch, Case, Lazy, List, Array, Sequence from util
 _ = util.it
 require 'std'
 
@@ -65,7 +65,7 @@ minus = (X, Y) ->
   x, xs = X\head!, X\tail!
   y, ys = Y\head!, Y\tail!
   if x < y
-    Sequence\ConsDelay (-> x), Delay -> minus xs, Y
+    Sequence\ConsDelay (-> x), Lazy -> minus xs, Y
   elseif x <= y
     minus xs, ys
   else
@@ -76,16 +76,16 @@ union = (X, Y) ->
   x, xs = X\head!, X\tail!
   y, ys = Y\head!, Y\tail!
   if x < y
-    Sequence\ConsDelay (-> x), Delay -> union xs, Y
+    Sequence\ConsDelay (-> x), Lazy -> union xs, Y
   elseif x <= y
-    Sequence\ConsDelay (-> x), Delay -> union xs, ys
+    Sequence\ConsDelay (-> x), Lazy -> union xs, ys
   else
-    Sequence\ConsDelay (-> y), Delay -> union X, ys
+    Sequence\ConsDelay (-> y), Lazy -> union X, ys
 prime = do
   eulers = (x) ->
     p, xs = x\head!, x\tail!
-    Sequence\ConsDelay (-> p), Delay -> eulers minus xs, x\map(=> p * @)
-  Sequence\ConsDelay (-> 2), Delay -> eulers Sequence\iterate((=> @ + 2), 1)
+    Sequence\ConsDelay (-> p), Lazy -> eulers minus xs, x * p
+  Sequence\ConsDelay (-> 2), Lazy -> eulers Sequence\iterate((=> @ + 2), 1)
 
 print '# Primes'
 print prime
