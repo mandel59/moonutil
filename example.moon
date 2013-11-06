@@ -59,6 +59,14 @@ print nat\map Switch {
   _
 }
 
+print '# Monad'
+print List\Table({1, 2, 3, 4, 5})\bind (x) ->
+  List\Table({'a', 'b', 'c'})\bind (y) ->
+    if x % 2 ~= 0
+      List\pure x .. y
+    else
+      List\Nil!
+
 -- from www.haskell.org/haskellwiki/Prime_numbers
 minus = (X, Y) ->
   return X if Y\empty!
