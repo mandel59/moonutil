@@ -390,7 +390,7 @@ class List extends Functor
   @pureDelay: (x) => @ConsDelay x, (Lazy -> @Nil!)
   apply: (other) => (@map delayfunc)\applyDelay(-> other)
   applyDelay: (other) => @concatMapDelay (f) -> other!\mapDelay f!
-  bind: (f) => @concatMap(f)
+  bind: (f) => @bindDelay(delayfunc f)
   bindDelay: (f) => @concatMapDelay(f)
   extract: => @head!
   extend: (f) => @@ConsDelay (Lazy -> f @), (Lazy -> (@tail! or @@Nil!)\extend f)
@@ -426,9 +426,9 @@ class Sequence extends List
   __pow: (o) => @pow o
   __unm: => @unm!
   __concat: (o) => @append o
-  concatDelay: => @diagonalDelay!
   @pureDelay: (x) => @repeatDelay x
   applyDelay: (other) => @zipApplyDelay other
+  bindDelay: => @mapDelay(f)\diagonalDelay!
 
 return {
   :id
